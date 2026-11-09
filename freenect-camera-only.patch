@@ -1,0 +1,19 @@
+diff --git a/src/obs-kinect-freenect/FreenectPlugin.cpp b/src/obs-kinect-freenect/FreenectPlugin.cpp
+index 0c09eaa..f2ef640 100644
+--- a/src/obs-kinect-freenect/FreenectPlugin.cpp
++++ b/src/obs-kinect-freenect/FreenectPlugin.cpp
+@@ -52,8 +52,12 @@ m_contextThreadRunning(true)
+ 	freenect_set_log_level(m_context, logLevel);
+ 	freenect_set_log_callback(m_context, &ErrorCallback);
+ 
+-	// we're not supporting audio for now
+-	freenect_select_subdevices(m_context, static_cast<freenect_device_flags>(FREENECT_DEVICE_MOTOR | FREENECT_DEVICE_CAMERA));
++	// We only need the camera (color/depth/IR): no audio, tilt or LED control is used by this plugin.
++	// Requesting the motor is harmful on Kinect for Windows / model 1473 devices: libfreenect drives their
++	// motor through the audio device, so it resets and then opens it. On some USB controllers that device
++	// doesn't survive the reset (usb: "can't restore configuration #1 (error=-110)"), which makes the whole
++	// open fail with LIBUSB_ERROR_IO even though the camera itself works.
++	freenect_select_subdevices(m_context, static_cast<freenect_device_flags>(FREENECT_DEVICE_CAMERA));
+ 
+ 	m_contextThread = std::thread([this]()
+ 	{
