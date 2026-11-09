@@ -52,8 +52,9 @@ m_contextThreadRunning(true)
 	freenect_set_log_level(m_context, logLevel);
 	freenect_set_log_callback(m_context, &ErrorCallback);
 
-	// we're not supporting audio for now
-	freenect_select_subdevices(m_context, static_cast<freenect_device_flags>(FREENECT_DEVICE_MOTOR | FREENECT_DEVICE_CAMERA));
+	   // Camera only: requesting the motor makes libfreenect reset and open the audio device on
+   // Kinect for Windows / 1473 models, which fails on some USB controllers.
+   freenect_select_subdevices(m_context, static_cast<freenect_device_flags>(FREENECT_DEVICE_CAMERA));
 
 	m_contextThread = std::thread([this]()
 	{
